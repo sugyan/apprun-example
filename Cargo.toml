@@ -12,3 +12,7 @@ tokio = { version = "1.43.0", default-features = false, features = [
     "macros",
     "rt",
 ] }
+
+[[bin]]
+name = "webapp"
+path = "src/bin/main.rs"
