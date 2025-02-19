@@ -5,7 +5,7 @@ WORKDIR /app
 RUN rustup target add x86_64-unknown-linux-musl
 
 COPY Cargo.toml Cargo.lock ./
-RUN cargo fetch
+RUN cargo fetch --locked
 
 COPY src ./src
 RUN cargo build --release --target=x86_64-unknown-linux-musl
