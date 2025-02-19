@@ -19,20 +19,6 @@ resource "sakuracloud_apprun_application" "app" {
         password = var.container_registry_user.password
       }
     }
-    # env {
-    #   key   = "key"
-    #   value = "value"
-    # }
-    # probe {
-    #   http_get {
-    #     path = "/"
-    #     port = 80
-    #     headers {
-    #       name  = "name"
-    #       value = "value"
-    #     }
-    #   }
-    # }
   }
 
   traffics {

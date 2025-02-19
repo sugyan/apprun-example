@@ -1,0 +1,5 @@
+container_registry_subdomain_label = "myregistry"
+container_registry_user = {
+  name     = "apprun"
+  password = "********************"
+}

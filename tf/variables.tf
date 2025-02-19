@@ -7,11 +7,13 @@ variable "apprun_app_name" {
 variable "apprun_component_name" {
   description = "The name of the component"
   type        = string
+  default     = "web"
 }
 
 variable "apprun_image_name" {
   description = "The name of the image"
   type        = string
+  default     = "webapp:latest"
 }
 
 variable "container_registry_name" {
