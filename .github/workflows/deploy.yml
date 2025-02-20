@@ -2,10 +2,8 @@ name: Deploy
 
 on:
   push:
-    branches: ["*"]
-
-env:
-  REGISTRY: ${{ secrets.CONTAINER_REGISTRY_SERVER }}
+    branches:
+      - main
 
 jobs:
   build:
@@ -19,18 +17,24 @@ jobs:
 
       # Login against a Docker registry
       # https://github.com/docker/login-action
-      - name: Log into registry ${{ env.REGISTRY }}
+      - name: Log into registry ${{ vars.CONTAINER_REGISTRY_SERVER }}
         uses: docker/login-action@v3 # v3.3.0
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ vars.CONTAINER_REGISTRY_SERVER }}
           username: apprun
           password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+          ecr: false
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v5 # v5.6.1
+        uses: docker/metadata-action@906ecf0fc0a80f9110f79d9e6c04b1080f4a2621 # https://github.com/docker/metadata-action/pull/489
+        with:
+          labels: |
+            org.opencontainers.image.created={{ commit_date 'YYYY-MM-DDTHH:mm:ssZZ' tz='Asia/Tokyo' }}
+            org.opencontainers.image.revision={{ sha }}
+            org.opencontainers.image.branch={{ branch}}
 
       # Build and push Docker image
       # https://github.com/docker/build-push-action
@@ -40,5 +44,28 @@ jobs:
         with:
           context: .
           push: true
-          tags: webapp
+          tags: "${{ vars.CONTAINER_REGISTRY_SERVER }}/webapp"
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            IMAGE_CREATED=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            IMAGE_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+            IMAGE_BRANCH=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.branch'] }}
+
+      - name: Download apprun-cli
+        run: |
+          curl -sLO https://github.com/fujiwara/apprun-cli/releases/download/v0.2.3/apprun-cli_0.2.3_linux_amd64.tar.gz
+
+      - name: Extract apprun-cli
+        run: |
+          tar xzvf apprun-cli_0.2.3_linux_amd64.tar.gz
+
+      - name: Deploy to AppRun
+        env:
+          SAKURACLOUD_ACCESS_TOKEN: ${{ secrets.SAKURACLOUD_ACCESS_TOKEN }}
+          SAKURACLOUD_ACCESS_TOKEN_SECRET: ${{ secrets.SAKURACLOUD_ACCESS_TOKEN_SECRET }}
+          CONTAINER_REGISTRY_SERVER: ${{ vars.CONTAINER_REGISTRY_SERVER }}
+          CONTAINER_REGISTRY_IMAGE: "webapp@${{ steps.build-and-push.outputs.digest }}"
+          CONTAINER_REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+        run: |
+          ./apprun-cli diff   --app deploy/myapp.jsonnet
+          ./apprun-cli deploy --app deploy/myapp.jsonnet
