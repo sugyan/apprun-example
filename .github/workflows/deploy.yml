@@ -2,8 +2,6 @@ name: Deploy
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
   build:
@@ -51,13 +49,7 @@ jobs:
             IMAGE_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
             IMAGE_BRANCH=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.branch'] }}
 
-      - name: Download apprun-cli
-        run: |
-          curl -sLO https://github.com/fujiwara/apprun-cli/releases/download/v0.2.3/apprun-cli_0.2.3_linux_amd64.tar.gz
-
-      - name: Extract apprun-cli
-        run: |
-          tar xzvf apprun-cli_0.2.3_linux_amd64.tar.gz
+      - uses: fujiwara/apprun-cli@v0
 
       - name: Deploy to AppRun
         env:
