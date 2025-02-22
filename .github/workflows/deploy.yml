@@ -51,13 +51,10 @@ jobs:
             IMAGE_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
             IMAGE_BRANCH=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.branch'] }}
 
-      - name: Download apprun-cli
-        run: |
-          curl -sLO https://github.com/fujiwara/apprun-cli/releases/download/v0.2.3/apprun-cli_0.2.3_linux_amd64.tar.gz
-
-      - name: Extract apprun-cli
-        run: |
-          tar xzvf apprun-cli_0.2.3_linux_amd64.tar.gz
+      - name: Install AppRun CLI
+        uses: fujiwara/apprun-cli@v0.3.2
+        with:
+          version: v0.3.2
 
       - name: Deploy to AppRun
         env:
@@ -67,5 +64,5 @@ jobs:
           CONTAINER_REGISTRY_IMAGE: "webapp@${{ steps.build-and-push.outputs.digest }}"
           CONTAINER_REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
         run: |
-          ./apprun-cli diff   --app deploy/myapp.jsonnet
-          ./apprun-cli deploy --app deploy/myapp.jsonnet
+          apprun-cli diff   --app deploy/myapp.jsonnet
+          apprun-cli deploy --app deploy/myapp.jsonnet
