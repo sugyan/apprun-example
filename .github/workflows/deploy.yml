@@ -52,7 +52,7 @@ jobs:
             IMAGE_BRANCH=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.branch'] }}
 
       - name: Install AppRun CLI
-        uses: fujiwara/apprun-cli@v0.3.2
+        uses: fujiwara/apprun-cli@v0
         with:
           version: v0.3.2
 
